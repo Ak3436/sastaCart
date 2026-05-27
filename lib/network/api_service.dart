@@ -99,18 +99,16 @@ class ApiService {
   }
 
 
+  // ── User Profile ─────────────────────────────────────────────────
+
   /// =========================
   /// USER PROFILE API
   /// =========================
-  /// API CALLING CODE
-  Future<UserProfileModel>
-  getUserProfile(int userId) async {
-    final response =
-    await ApiClient.dio.get("users/$userId",
-    );
-
-    return UserProfileModel.fromJson(
-      response.data,
-    );
+  /// Fetches full user details for [userId] from /users/:id.
+  /// The response now includes nested `address` and `company` objects
+  /// which are parsed into [AddressModel] and [CompanyModel].
+  Future<UserProfileModel> getUserProfile(int userId) async {
+    final response = await ApiClient.dio.get("users/$userId");
+    return UserProfileModel.fromJson(response.data);
   }
 }

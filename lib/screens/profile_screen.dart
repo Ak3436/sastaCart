@@ -5,740 +5,119 @@ import '../utils/edge_to_edge.dart';
 import '../viewmodel/profile_view_model.dart';
 import '../widgets/home_shimmer.dart';
 
+/// =========================
+/// PROFILE SCREEN
+/// =========================
+/// Displays the full user profile fetched from DummyJSON.
+/// Follows the attached design reference:
+///   • Gradient header with avatar, name, email & address
+///   • "Personal Information" card with a 2-column info grid
+///   • "Company Details" card with logo placeholder and job info
+///   • Stats row (Years of Experience, Projects, Awards, Feedback)
+///   • Logout button
+///
+/// State management: [ProfileViewModel] via Provider / ChangeNotifier.
 class ProfileScreen extends StatefulWidget {
-
   final VoidCallback onLogout;
 
-  const ProfileScreen({
-
-    super.key,
-
-    required this.onLogout,
-  });
+  const ProfileScreen({super.key, required this.onLogout});
 
   @override
-  State<ProfileScreen> createState() =>
-      _ProfileScreenState();
+  State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState
-    extends State<ProfileScreen> {
+class _ProfileScreenState extends State<ProfileScreen> {
+
+  // ── Lifecycle ────────────────────────────────────────────────────
 
   @override
   void initState() {
-
     super.initState();
 
     /// =========================
-    /// DYNAMIC USER ID
+    /// TRIGGER API CALL
     /// =========================
-    int userId = 1;
-
+    /// microtask ensures the widget tree is fully mounted before
+    /// we touch the Provider (avoids "called during build" errors).
     Future.microtask(() {
-
-      context
-          .read<ProfileViewModel>()
-          .getUserProfile(
-        userId,
-      );
+      context.read<ProfileViewModel>().getUserProfile(1);
     });
   }
 
+  // ── Build ────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
-
     return Consumer<ProfileViewModel>(
-
-      builder: (_, vm, child) {
+      builder: (_, vm, __) {
 
         /// =========================
-        /// SHIMMER LOADER
+        /// LOADING STATE → SHIMMER
         /// =========================
-        if (vm.isLoading) {
-
-          return const HomeShimmer();
-        }
+        if (vm.isLoading) return const HomeShimmer();
 
         /// =========================
         /// ERROR STATE
         /// =========================
         if (vm.errorMessage.isNotEmpty) {
-
-          return Center(
-
-            child: Text(
-
-              vm.errorMessage,
-
-              style: const TextStyle(
-                fontSize: 16,
-              ),
-            ),
-          );
+          return _buildErrorState(vm.errorMessage, vm);
         }
 
         /// =========================
-        /// NULL CHECK
+        /// NULL GUARD
         /// =========================
-        if (vm.user == null) {
-
-          return const SizedBox();
-        }
+        if (vm.user == null) return const SizedBox();
 
         final user = vm.user!;
 
         return EdgeToEdgeBody(
-
           bottom: false,
-
           child: SingleChildScrollView(
-
+            physics: const BouncingScrollPhysics(),
             child: Column(
-
               children: [
 
-                /// =========================================
-                /// TOP PROFILE HEADER
-                /// =========================================
-                Stack(
-
-                  clipBehavior: Clip.none,
-
-                  children: [
-
-                    /// =====================================
-                    /// BLUE GRADIENT BACKGROUND
-                    /// =====================================
-                    Container(
-
-                      height: 320,
-
-                      width: double.infinity,
-
-                      decoration:
-                      const BoxDecoration(
-
-                        gradient:
-                        LinearGradient(
-
-                          colors: [
-
-                            Color(0xff1565C0),
-
-                            Color(0xff42A5F5),
-                          ],
-
-                          begin:
-                          Alignment.topLeft,
-
-                          end:
-                          Alignment.bottomRight,
-                        ),
-
-                        borderRadius:
-                        BorderRadius.only(
-
-                          bottomLeft:
-                          Radius.circular(
-                            35,
-                          ),
-
-                          bottomRight:
-                          Radius.circular(
-                            35,
-                          ),
-                        ),
-                      ),
-
-                      child: Padding(
-
-                        padding:
-                        const EdgeInsets.only(
-                          top: 60,
-                          left: 20,
-                          right: 20,
-                        ),
-
-                        child: Column(
-
-                          children: [
-
-                            /// =========================
-                            /// TITLE + ICON
-                            /// =========================
-                            Row(
-
-                              mainAxisAlignment:
-                              MainAxisAlignment
-                                  .spaceBetween,
-
-                              children: [
-
-                                const Text(
-
-                                  "My Profile",
-
-                                  style: TextStyle(
-
-                                    color:
-                                    Colors.white,
-
-                                    fontSize: 30,
-
-                                    fontWeight:
-                                    FontWeight.bold,
-                                  ),
-                                ),
-
-                                Container(
-
-                                  padding:
-                                  const EdgeInsets
-                                      .all(10),
-
-                                  decoration:
-                                  BoxDecoration(
-
-                                    color: Colors
-                                        .white
-                                        .withOpacity(
-                                      0.2,
-                                    ),
-
-                                    borderRadius:
-                                    BorderRadius
-                                        .circular(
-                                      14,
-                                    ),
-                                  ),
-
-                                  child: const Icon(
-
-                                    Icons.person,
-
-                                    color:
-                                    Colors.white,
-
-                                    size: 28,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(
-                                height: 30),
-
-                            /// ===================================
-                            /// ATTRACTIVE PROFILE IMAGE
-                            /// ===================================
-                            Center(
-
-                              child: Stack(
-
-                                alignment:
-                                Alignment
-                                    .bottomRight,
-
-                                children: [
-
-                                  /// GLOW EFFECT
-                                  Container(
-
-                                    padding:
-                                    const EdgeInsets
-                                        .all(5),
-
-                                    decoration:
-                                    BoxDecoration(
-
-                                      shape:
-                                      BoxShape
-                                          .circle,
-
-                                      gradient:
-                                      const LinearGradient(
-
-                                        colors: [
-
-                                          Color(
-                                              0xff42A5F5),
-
-                                          Color(
-                                              0xff1565C0),
-                                        ],
-                                      ),
-
-                                      boxShadow: [
-
-                                        BoxShadow(
-
-                                          color: Colors
-                                              .blue
-                                              .withOpacity(
-                                            0.45,
-                                          ),
-
-                                          blurRadius:
-                                          18,
-
-                                          spreadRadius:
-                                          4,
-
-                                          offset:
-                                          const Offset(
-                                            0,
-                                            6,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-
-                                    child: Container(
-
-                                      padding:
-                                      const EdgeInsets
-                                          .all(4),
-
-                                      decoration:
-                                      BoxDecoration(
-
-                                        shape:
-                                        BoxShape
-                                            .circle,
-
-                                        border:
-                                        Border.all(
-
-                                          color:
-                                          Colors
-                                              .white,
-
-                                          width:
-                                          3,
-                                        ),
-                                      ),
-
-                                      child:
-                                      CircleAvatar(
-
-                                        radius:
-                                        58,
-
-                                        backgroundColor:
-                                        Colors
-                                            .white,
-
-                                        backgroundImage:
-                                        NetworkImage(
-                                          user.image,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-
-                                  /// CAMERA ICON
-                                  Positioned(
-
-                                    bottom: 4,
-                                    right: 4,
-
-                                    child:
-                                    Container(
-
-                                      height:
-                                      42,
-
-                                      width:
-                                      42,
-
-                                      decoration:
-                                      BoxDecoration(
-
-                                        gradient:
-                                        const LinearGradient(
-
-                                          colors: [
-
-                                            Color(
-                                                0xff1E88E5),
-
-                                            Color(
-                                                0xff1565C0),
-                                          ],
-                                        ),
-
-                                        shape:
-                                        BoxShape
-                                            .circle,
-
-                                        border:
-                                        Border.all(
-
-                                          color:
-                                          Colors
-                                              .white,
-
-                                          width:
-                                          3,
-                                        ),
-
-                                        boxShadow: [
-
-                                          BoxShadow(
-
-                                            color: Colors
-                                                .black
-                                                .withOpacity(
-                                              0.2,
-                                            ),
-
-                                            blurRadius:
-                                            10,
-
-                                            offset:
-                                            const Offset(
-                                              0,
-                                              4,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-
-                                      child:
-                                      const Icon(
-
-                                        Icons
-                                            .camera_alt,
-
-                                        color:
-                                        Colors
-                                            .white,
-
-                                        size:
-                                        20,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(
-                                height: 18),
-
-                            /// ===================================
-                            /// NAME
-                            /// ===================================
-                            Text(
-
-                              "${user.firstName} ${user.lastName}",
-
-                              style:
-                              const TextStyle(
-
-                                color:
-                                Colors.white,
-
-                                fontSize: 26,
-
-                                fontWeight:
-                                FontWeight.bold,
-
-                                letterSpacing:
-                                0.6,
-                              ),
-                            ),
-
-                            const SizedBox(
-                                height: 8),
-
-                            /// ===================================
-                            /// USERNAME BADGE
-                            /// ===================================
-                            Container(
-
-                              padding:
-                              const EdgeInsets
-                                  .symmetric(
-
-                                horizontal:
-                                16,
-
-                                vertical: 7,
-                              ),
-
-                              decoration:
-                              BoxDecoration(
-
-                                color: Colors
-                                    .white
-                                    .withOpacity(
-                                  0.18,
-                                ),
-
-                                borderRadius:
-                                BorderRadius
-                                    .circular(
-                                  25,
-                                ),
-
-                                border:
-                                Border.all(
-
-                                  color: Colors
-                                      .white
-                                      .withOpacity(
-                                    0.3,
-                                  ),
-                                ),
-                              ),
-
-                              child: Text(
-
-                                "@${user.username}",
-
-                                style:
-                                const TextStyle(
-
-                                  color:
-                                  Colors.white,
-
-                                  fontSize:
-                                  14,
-
-                                  fontWeight:
-                                  FontWeight
-                                      .w600,
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(
-                                height: 10),
-
-                            /// ===================================
-                            /// EMAIL
-                            /// ===================================
-                            Text(
-
-                              user.email,
-
-                              style:
-                              const TextStyle(
-
-                                color:
-                                Colors.white70,
-
-                                fontSize: 15,
-
-                                fontWeight:
-                                FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    /// =========================================
-                    /// FLOATING INFO CARD
-                    /// =========================================
-                    Positioned(
-
-                      bottom: -35,
-
-                      left: 20,
-                      right: 20,
-
-                      child: Container(
-
-                        padding:
-                        const EdgeInsets.all(
-                          18,
-                        ),
-
-                        decoration:
-                        BoxDecoration(
-
-                          color: Colors.white,
-
-                          borderRadius:
-                          BorderRadius.circular(
-                            20,
-                          ),
-
-                          boxShadow: [
-
-                            BoxShadow(
-
-                              color: Colors.black
-                                  .withOpacity(
-                                0.08,
-                              ),
-
-                              blurRadius: 12,
-
-                              offset:
-                              const Offset(
-                                0,
-                                5,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        child: Row(
-
-                          mainAxisAlignment:
-                          MainAxisAlignment
-                              .spaceAround,
-
-                          children: [
-
-                            buildTopInfo(
-                              "Age",
-                              "${user.age}",
-                            ),
-
-                            buildDivider(),
-
-                            buildTopInfo(
-                              "Gender",
-                              user.gender,
-                            ),
-
-                            buildDivider(),
-
-                            buildTopInfo(
-                              "Blood",
-                              user.bloodGroup,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                // ── (1) GRADIENT HEADER ──────────────────────────
+                _buildHeader(user, vm),
+
+                const SizedBox(height: 20),
+
+                // ── (2) PERSONAL INFORMATION CARD ────────────────
+                _buildSectionCard(
+                  icon: Icons.person_outline,
+                  title: 'Personal Information',
+                  child: _buildPersonalInfoGrid(user, vm),
                 ),
 
-                const SizedBox(height: 60),
+                const SizedBox(height: 16),
 
-                /// =========================================
-                /// DETAILS SECTION
-                /// =========================================
-                buildProfileTile(
-
-                  Icons.person_outline,
-
-                  "Username",
-
-                  user.username,
+                // ── (3) ADDRESS CARD ─────────────────────────────
+                _buildSectionCard(
+                  icon: Icons.location_on_outlined,
+                  title: 'Address Details',
+                  child: _buildAddressGrid(user),
                 ),
 
-                buildProfileTile(
+                const SizedBox(height: 16),
 
-                  Icons.phone_outlined,
-
-                  "Phone Number",
-
-                  user.phone,
+                // ── (4) COMPANY DETAILS CARD ─────────────────────
+                _buildSectionCard(
+                  icon: Icons.business_center_outlined,
+                  title: 'Company Details',
+                  child: _buildCompanyDetails(user),
                 ),
 
-                buildProfileTile(
+                const SizedBox(height: 16),
 
-                  Icons.school_outlined,
+                // ── (5) STATS ROW ────────────────────────────────
+                _buildStatsRow(),
 
-                  "University",
+                const SizedBox(height: 24),
 
-                  user.university,
-                ),
+                // ── (6) LOGOUT BUTTON ────────────────────────────
+                _buildLogoutButton(),
 
-                buildProfileTile(
-
-                  Icons.remove_red_eye_outlined,
-
-                  "Eye Color",
-
-                  user.eyeColor,
-                ),
-
-                buildProfileTile(
-
-                  Icons.email_outlined,
-
-                  "Email",
-
-                  user.email,
-                ),
-
-                const SizedBox(height: 25),
-
-                /// =========================================
-                /// LOGOUT BUTTON
-                /// =========================================
-                Padding(
-
-                  padding:
-                  const EdgeInsets.symmetric(
-                    horizontal: 18,
-                  ),
-
-                  child: SizedBox(
-
-                    width: double.infinity,
-
-                    height: 58,
-
-                    child:
-                    ElevatedButton.icon(
-
-                      onPressed:
-                      widget.onLogout,
-
-                      icon: const Icon(
-                        Icons.logout,
-                        size: 24,
-                      ),
-
-                      label: const Text(
-
-                        "Logout",
-
-                        style: TextStyle(
-
-                          fontSize: 18,
-
-                          fontWeight:
-                          FontWeight.bold,
-                        ),
-                      ),
-
-                      style:
-                      ElevatedButton
-                          .styleFrom(
-
-                        backgroundColor:
-                        Colors.redAccent,
-
-                        foregroundColor:
-                        Colors.white,
-
-                        elevation: 4,
-
-                        shape:
-                        RoundedRectangleBorder(
-
-                          borderRadius:
-                          BorderRadius
-                              .circular(
-                            18,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 30),
+                const SizedBox(height: 36),
               ],
             ),
           ),
@@ -747,184 +126,677 @@ class _ProfileScreenState
     );
   }
 
-  /// =========================================
-  /// TOP INFO UI
-  /// =========================================
-  Widget buildTopInfo(
-      String title,
-      String value) {
+  // ════════════════════════════════════════════════════════════════
+  // HEADER
+  // ════════════════════════════════════════════════════════════════
 
-    return Column(
+  /// Blue gradient banner containing:
+  ///   • Rounded avatar with online indicator
+  ///   • Verified name badge
+  ///   • Email and address lines
+  Widget _buildHeader(user, ProfileViewModel vm) {
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xff1565C0), Color(0xff42A5F5)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(35),
+          bottomRight: Radius.circular(35),
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+          child: Column(
+            children: [
 
-      children: [
+              // ── App bar row ──────────────────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'My Profile',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  _headerIconButton(Icons.person),
+                ],
+              ),
 
-        Text(
+              const SizedBox(height: 28),
 
-          value,
+              // ── Avatar ───────────────────────────────────────
+              Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  /// White ring + gradient ring + network image
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.45),
+                          blurRadius: 18,
+                          spreadRadius: 4,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: CircleAvatar(
+                      radius: 56,
+                      backgroundColor: Colors.white,
+                      backgroundImage: NetworkImage(user.image),
+                    ),
+                  ),
 
-          style: const TextStyle(
+                  /// Green online dot
+                  Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: const Color(0xff4CAF50),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2.5),
+                    ),
+                  ),
+                ],
+              ),
 
-            fontSize: 20,
+              const SizedBox(height: 16),
 
-            fontWeight:
-            FontWeight.bold,
+              // ── Name + verified badge ────────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    user.fullName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.verified, color: Color(0xff64B5F6), size: 24),
+                ],
+              ),
 
-            color: Colors.black87,
+              const SizedBox(height: 8),
+
+              // ── Email ────────────────────────────────────────
+              Text(
+                user.email,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.9),
+                  fontSize: 15,
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              // ── Address one-liner ────────────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.location_on, color: Colors.white70, size: 16),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      '${user.address.address}, ${user.address.city}, '
+                          '${user.address.country}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.85),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
+      ),
+    );
+  }
 
-        const SizedBox(height: 4),
+  /// Small frosted-glass icon button used in the header bar.
+  Widget _headerIconButton(IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Icon(icon, color: Colors.white, size: 26),
+    );
+  }
 
-        Text(
+  // ════════════════════════════════════════════════════════════════
+  // SECTION CARD WRAPPER
+  // ════════════════════════════════════════════════════════════════
 
-          title,
+  /// Reusable white card with a header icon + title and a [child] body.
+  Widget _buildSectionCard({
+    required IconData icon,
+    required String title,
+    required Widget child,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
 
-          style: const TextStyle(
+          // ── Card header ──────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Row(
+              children: [
+                Icon(icon, color: const Color(0xff1565C0), size: 24),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
 
-            fontSize: 14,
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Divider(height: 20),
+          ),
 
-            color: Colors.grey,
+          // ── Card body ────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: child,
+          ),
+        ],
+      ),
+    );
+  }
 
-            fontWeight:
-            FontWeight.w500,
+  // ════════════════════════════════════════════════════════════════
+  // PERSONAL INFORMATION GRID
+  // ════════════════════════════════════════════════════════════════
+
+  /// 2-column grid of labelled info tiles (matches reference design).
+  Widget _buildPersonalInfoGrid(user, ProfileViewModel vm) {
+    return Column(
+      children: [
+        _infoRow(
+          left: _infoCell(
+            icon: Icons.calendar_today,
+            iconColor: const Color(0xff5C6BC0),
+            iconBg: const Color(0xffEDE7F6),
+            label: 'Birthdate',
+            value: vm.formattedBirthDate,
+          ),
+          right: _infoCell(
+            icon: Icons.phone,
+            iconColor: const Color(0xff43A047),
+            iconBg: const Color(0xffE8F5E9),
+            label: 'Phone Number',
+            value: user.phone,
+          ),
+        ),
+        _rowDivider(),
+        _infoRow(
+          left: _infoCell(
+            icon: Icons.cake_outlined,
+            iconColor: const Color(0xffF57C00),
+            iconBg: const Color(0xffFFF3E0),
+            label: 'Age',
+            value: '${user.age} Years',
+          ),
+          right: _infoCell(
+            icon: Icons.email_outlined,
+            iconColor: const Color(0xff8E24AA),
+            iconBg: const Color(0xffF3E5F5),
+            label: 'Email Address',
+            value: user.email,
+          ),
+        ),
+        _rowDivider(),
+        _infoRow(
+          left: _infoCell(
+            icon: Icons.wc_outlined,
+            iconColor: const Color(0xff039BE5),
+            iconBg: const Color(0xffE1F5FE),
+            label: 'Gender',
+            value: _capitalize(user.gender),
+          ),
+          right: _infoCell(
+            icon: Icons.public,
+            iconColor: const Color(0xff00897B),
+            iconBg: const Color(0xffE0F2F1),
+            label: 'Nationality',
+            value: user.address.country,
           ),
         ),
       ],
     );
   }
 
-  /// =========================================
-  /// DIVIDER
-  /// =========================================
-  Widget buildDivider() {
+  // ════════════════════════════════════════════════════════════════
+  // ADDRESS GRID
+  // ════════════════════════════════════════════════════════════════
 
-    return Container(
-
-      height: 40,
-
-      width: 1,
-
-      color: Colors.grey.shade300,
+  Widget _buildAddressGrid(user) {
+    final addr = user.address;
+    return Column(
+      children: [
+        _infoRow(
+          left: _infoCell(
+            icon: Icons.home_outlined,
+            iconColor: const Color(0xffe53935),
+            iconBg: const Color(0xffFFEBEE),
+            label: 'Street',
+            value: addr.address,
+          ),
+          right: _infoCell(
+            icon: Icons.location_city_outlined,
+            iconColor: const Color(0xff1E88E5),
+            iconBg: const Color(0xffE3F2FD),
+            label: 'City',
+            value: addr.city,
+          ),
+        ),
+        _rowDivider(),
+        _infoRow(
+          left: _infoCell(
+            icon: Icons.map_outlined,
+            iconColor: const Color(0xff43A047),
+            iconBg: const Color(0xffE8F5E9),
+            label: 'State',
+            value: addr.state,
+          ),
+          right: _infoCell(
+            icon: Icons.markunread_mailbox_outlined,
+            iconColor: const Color(0xffF57C00),
+            iconBg: const Color(0xffFFF3E0),
+            label: 'Postal Code',
+            value: addr.postalCode,
+          ),
+        ),
+        _rowDivider(),
+        _infoCell(
+          icon: Icons.flag_outlined,
+          iconColor: const Color(0xff5C6BC0),
+          iconBg: const Color(0xffEDE7F6),
+          label: 'Country',
+          value: addr.country,
+        ),
+      ],
     );
   }
 
-  /// =========================================
-  /// PROFILE TILE
-  /// =========================================
-  Widget buildProfileTile(
+  // ════════════════════════════════════════════════════════════════
+  // COMPANY DETAILS
+  // ════════════════════════════════════════════════════════════════
 
-      IconData icon,
-      String title,
-      String value) {
+  /// Matches the reference: company logo placeholder on the left,
+  /// three labelled rows (Name, Department, Title) on the right,
+  /// plus Employee ID, Work Email and Office Address.
+  Widget _buildCompanyDetails(user) {
+    final company = user.company;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
 
-    return Container(
+        // ── Logo + primary info side-by-side ─────────────────
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
 
-      margin:
-      const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
-      ),
-
-      padding:
-      const EdgeInsets.all(16),
-
-      decoration: BoxDecoration(
-
-        color: Colors.white,
-
-        borderRadius:
-        BorderRadius.circular(18),
-
-        boxShadow: [
-
-          BoxShadow(
-
-            color:
-            Colors.black.withOpacity(
-              0.05,
-            ),
-
-            blurRadius: 10,
-
-            offset:
-            const Offset(0, 5),
-          ),
-        ],
-      ),
-
-      child: Row(
-
-        children: [
-
-          /// ICON
-          Container(
-
-            padding:
-            const EdgeInsets.all(12),
-
-            decoration: BoxDecoration(
-
-              color: Colors.blue
-                  .withOpacity(0.1),
-
-              borderRadius:
-              BorderRadius.circular(
-                14,
+            /// Company logo placeholder (gradient diamond)
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: const LinearGradient(
+                  colors: [Color(0xff1565C0), Color(0xff42A5F5)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: const Icon(
+                Icons.business,
+                color: Colors.white,
+                size: 40,
               ),
             ),
 
-            child: Icon(
+            const SizedBox(width: 16),
 
-              icon,
+            /// Name, Department, Title
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _companyInfoRow(
+                    icon: Icons.business_outlined,
+                    label: 'Company Name',
+                    value: company.name,
+                  ),
+                  const SizedBox(height: 10),
+                  _companyInfoRow(
+                    icon: Icons.groups_outlined,
+                    label: 'Department',
+                    value: company.department,
+                  ),
+                  const SizedBox(height: 10),
+                  _companyInfoRow(
+                    icon: Icons.person_outline,
+                    label: 'Job Title',
+                    value: company.title,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
 
-              color: Colors.blue,
+        const Divider(height: 24),
 
-              size: 26,
+        // ── Office address ───────────────────────────────────
+        _companyInfoRow(
+          icon: Icons.location_on_outlined,
+          label: 'Office Address',
+          value: company.address.formatted,
+        ),
+      ],
+    );
+  }
+
+  /// Single labelled row inside the Company card.
+  Widget _companyInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: const Color(0xff1565C0)),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // STATS ROW
+  // ════════════════════════════════════════════════════════════════
+
+  /// Four stat chips in a row (Years of Experience, Projects,
+  /// Awards, Positive Feedback) matching the bottom of the reference.
+  Widget _buildStatsRow() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _statChip(
+            icon: Icons.work_outline,
+            iconColor: const Color(0xff5C6BC0),
+            iconBg: const Color(0xffEDE7F6),
+            value: '4+',
+            label: 'Years of\nExperience',
+          ),
+          _statChip(
+            icon: Icons.people_outline,
+            iconColor: const Color(0xff43A047),
+            iconBg: const Color(0xffE8F5E9),
+            value: '32',
+            label: 'Projects\nCompleted',
+          ),
+          _statChip(
+            icon: Icons.emoji_events_outlined,
+            iconColor: const Color(0xffF57C00),
+            iconBg: const Color(0xffFFF3E0),
+            value: '8',
+            label: 'Awards\nReceived',
+          ),
+          _statChip(
+            icon: Icons.star_outline,
+            iconColor: const Color(0xffe91e63),
+            iconBg: const Color(0xffFCE4EC),
+            value: '98%',
+            label: 'Positive\nFeedback',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statChip({
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBg,
+    required String value,
+    required String label,
+  }) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: iconBg,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(icon, color: iconColor, size: 26),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 11, color: Colors.grey),
+        ),
+      ],
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // LOGOUT BUTTON
+  // ════════════════════════════════════════════════════════════════
+
+  Widget _buildLogoutButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: ElevatedButton.icon(
+          onPressed: widget.onLogout,
+          icon: const Icon(Icons.logout, size: 22),
+          label: const Text(
+            'Logout',
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.redAccent,
+            foregroundColor: Colors.white,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
+        ),
+      ),
+    );
+  }
 
-          const SizedBox(width: 15),
+  // ════════════════════════════════════════════════════════════════
+  // ERROR STATE
+  // ════════════════════════════════════════════════════════════════
 
-          /// TEXT SECTION
-          Expanded(
+  Widget _buildErrorState(String message, ProfileViewModel vm) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.wifi_off_rounded, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text(
+              'Something went wrong',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
 
-            child: Column(
-
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-
-              children: [
-
-                Text(
-
-                  title,
-
-                  style: const TextStyle(
-
-                    color: Colors.grey,
-
-                    fontSize: 14,
-
-                    fontWeight:
-                    FontWeight.w500,
-                  ),
+            /// Retry button – calls [getUserProfile] again.
+            ElevatedButton.icon(
+              onPressed: () => vm.getUserProfile(1),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xff1565C0),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 12,
                 ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-                const SizedBox(height: 4),
+  // ════════════════════════════════════════════════════════════════
+  // HELPER WIDGETS
+  // ════════════════════════════════════════════════════════════════
 
+  /// A row that places two [_infoCell]s side by side.
+  Widget _infoRow({required Widget left, required Widget right}) {
+    return Row(
+      children: [
+        Expanded(child: left),
+        const SizedBox(width: 12),
+        Expanded(child: right),
+      ],
+    );
+  }
+
+  /// A single labelled info tile with a coloured icon chip.
+  Widget _infoCell({
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBg,
+    required String label,
+    required String value,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: iconColor, size: 20),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-
+                  label,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                const SizedBox(height: 2),
+                Text(
                   value,
-
                   style: const TextStyle(
-
-                    color:
-                    Colors.black87,
-
-                    fontSize: 17,
-
-                    fontWeight:
-                    FontWeight.bold,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
                   ),
                 ),
               ],
@@ -934,4 +806,11 @@ class _ProfileScreenState
       ),
     );
   }
+
+  /// Light horizontal divider used between grid rows.
+  Widget _rowDivider() => const Divider(height: 1, color: Color(0xffF0F0F0));
+
+  /// Capitalises the first letter of a string (e.g. "male" → "Male").
+  String _capitalize(String s) =>
+      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 }
