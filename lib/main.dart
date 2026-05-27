@@ -9,52 +9,95 @@ import 'package:demo_flutter/viewmodel/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-Future<void> main() async {
+/// ======================================================
+/// MAIN METHOD
+/// ======================================================
+/// App execution yaha se start hota hai.
+/// Blank screen issue avoid karne ke liye
+/// koi heavy async operation yaha nahi karenge.
+/// ======================================================
+void main() {
+
+  /// Flutter engine initialize
   WidgetsFlutterBinding.ensureInitialized();
 
-  await EdgeToEdge.configureSystemUi();
   runApp(
+
+    /// ==================================================
+    /// MULTI PROVIDER
+    /// ==================================================
+    /// Sare ViewModels globally provide kiye gaye hain
+    /// taki app me kahi bhi access ho sake.
+    /// ==================================================
     MultiProvider(
+
       providers: [
-        /// HOME VIEW MODEL
-        ChangeNotifierProvider(create: (_) => HomeViewModel()),
+
+        /// HOME SCREEN VIEW MODEL
+        ChangeNotifierProvider(
+          create: (_) => HomeViewModel(),
+        ),
 
         /// CART VIEW MODEL
-        /// Shared globally so cart count badges update from any screen.
-        ChangeNotifierProvider(create: (_) => CartViewModel()),
+        ChangeNotifierProvider(
+          create: (_) => CartViewModel(),
+        ),
 
-        /// Profile View MOdel
-        ChangeNotifierProvider(create: (_) => ProfileViewModel()),
+        /// PROFILE VIEW MODEL
+        ChangeNotifierProvider(
+          create: (_) => ProfileViewModel(),
+        ),
       ],
+
       child: const MyApp(),
     ),
   );
 }
 
+/// ======================================================
+/// ROOT APP
+/// ======================================================
 class MyApp extends StatelessWidget {
+
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
+
       debugShowCheckedModeBanner: false,
+
+      /// ==================================================
+      /// APP THEME
+      /// ==================================================
       theme: ThemeData(
+
         primaryColor: AppColors.primaryColor,
-        scaffoldBackgroundColor: AppColors.backgroundColor,
+
+        scaffoldBackgroundColor:
+        AppColors.backgroundColor,
+
         appBarTheme: const AppBarTheme(
-          systemOverlayStyle: EdgeToEdge.systemUiOverlayStyle,
+
+          systemOverlayStyle:
+          EdgeToEdge.systemUiOverlayStyle,
         ),
+
         textTheme: const TextTheme(
-          headlineLarge: AppTextStyles.heading,
-          bodyMedium: AppTextStyles.bodyText,
+
+          headlineLarge:
+          AppTextStyles.heading,
+
+          bodyMedium:
+          AppTextStyles.bodyText,
         ),
       ),
 
-      /// SPLASH SCREEN
+      /// ==================================================
+      /// FIRST SCREEN
+      /// ==================================================
       home: const SplashScreen(),
     );
   }
 }
-
-
-

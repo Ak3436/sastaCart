@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../utils/app_strings.dart';
 import '../utils/app_text_styles.dart';
+import '../utils/edge_to_edge.dart';
 import 'login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -26,16 +27,51 @@ class _SplashScreenState
 
     super.initState();
 
+    /// ============================================
+    /// APP INITIALIZATION
+    /// ============================================
+    /// Splash screen instantly show karne ke liye
+    /// saare initialization yaha perform honge.
+    /// ============================================
+    initializeApp();
+  }
+
+  /// ============================================
+  /// INITIALIZE APP
+  /// ============================================
+  Future<void> initializeApp() async {
+
+    /// ==========================================
+    /// SYSTEM UI SETUP
+    /// ==========================================
+    /// Status bar and navigation bar setup
+    /// ==========================================
+    await EdgeToEdge.configureSystemUi();
+
+    /// Small delay for smooth rendering
+    await Future.delayed(
+      const Duration(milliseconds: 300),
+    );
+
+    /// Login check
     checkLogin();
   }
 
+  /// ============================================
+  /// CHECK LOGIN STATUS
+  /// ============================================
   Future<void> checkLogin() async {
 
+    /// SharedPreference se login status check
     bool isLogin =
     await SessionManager.isLoggedIn();
 
+    /// Splash Delay
     Timer(const Duration(seconds: 2), () {
 
+      /// ========================================
+      /// IF USER ALREADY LOGIN
+      /// ========================================
       if (isLogin) {
 
         Navigator.pushReplacement(
@@ -51,6 +87,9 @@ class _SplashScreenState
 
       } else {
 
+        /// ======================================
+        /// IF USER NOT LOGIN
+        /// ======================================
         Navigator.pushReplacement(
 
           context,
@@ -82,19 +121,25 @@ class _SplashScreenState
 
           children: [
 
+            /// ==================================
+            /// APP LOGO
+            /// ==================================
             Image.asset(
 
               'assets/images/sastalogo.png',
 
-              width: 100,
+              width: 110,
 
-              height: 100,
+              height: 110,
 
               fit: BoxFit.contain,
             ),
 
             const SizedBox(height: 20),
 
+            /// ==================================
+            /// APP NAME
+            /// ==================================
             Text(
 
               AppStrings.appName,
@@ -103,10 +148,16 @@ class _SplashScreenState
               AppTextStyles.appnameHead,
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 25),
 
+            /// ==================================
+            /// LOADING INDICATOR
+            /// ==================================
             const CircularProgressIndicator(
+
               color: Colors.white,
+
+              strokeWidth: 3,
             ),
           ],
         ),
