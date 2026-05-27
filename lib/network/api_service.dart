@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../model/category_model.dart';
 import '../model/cart_model.dart';
 import '../model/product_model.dart';
+import '../model/user_profile_model.dart';
 import 'api_client.dart';
 
 class ApiService {
@@ -94,6 +95,22 @@ class ApiService {
           {"id": productId, "quantity": quantity},
         ],
       },
+    );
+  }
+
+
+  /// =========================
+  /// USER PROFILE API
+  /// =========================
+  /// API CALLING CODE
+  Future<UserProfileModel>
+  getUserProfile(int userId) async {
+    final response =
+    await ApiClient.dio.get("users/$userId",
+    );
+
+    return UserProfileModel.fromJson(
+      response.data,
     );
   }
 }

@@ -539,7 +539,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     const WishlistScreen(),
 
-    ProfileScreen(userData: userData, onLogout: logoutUser),
+    // ProfileScreen(userData: userData, onLogout: logoutUser),
+    ProfileScreen(
+      onLogout: logoutUser,
+    ),
   ];
 
   @override
