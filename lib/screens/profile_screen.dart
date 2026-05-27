@@ -156,22 +156,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
 
               // ── App bar row ──────────────────────────────────
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'My Profile',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  _headerIconButton(Icons.person),
-                ],
-              ),
-
-              const SizedBox(height: 28),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //   children: [
+              //     const Text(
+              //       'My Profile',
+              //       style: TextStyle(
+              //         color: Colors.white,
+              //         fontSize: 26,
+              //         fontWeight: FontWeight.bold,
+              //       ),
+              //     ),
+              //     _headerIconButton(Icons.person),
+              //   ],
+              // ),
+              //
+              // const SizedBox(height: 28),
 
               // ── Avatar ───────────────────────────────────────
               Stack(
